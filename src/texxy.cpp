@@ -73,7 +73,7 @@ Texxy::Texxy(QWidget* parent) : QMainWindow(parent) {
         updateWindowTitle();
     });
 
-    setWindowTitle(tr("Untitled - Texxy"));
+    setWindowTitle(tr("Untitled - texxy"));
     resize(900, 600);
 
     loadSettings();
@@ -176,7 +176,7 @@ void Texxy::updateWindowTitle() {
     if (edit && edit->document()->isModified()) {
         title += "*";
     }
-    setWindowTitle(title + tr(" - Texxy"));
+    setWindowTitle(title + tr(" - texxy"));
 }
 
 int Texxy::createNewTab(const QString& filePath, const QString& content) {

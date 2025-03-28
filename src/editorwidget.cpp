@@ -23,12 +23,16 @@ void EditorWidget::LineNumberArea::paintEvent(QPaintEvent* event) {
     QTextBlock block = m_editor->textEdit()->firstVisibleBlock();
     int blockNumber = block.blockNumber();
 
-    int top = static_cast<int>(m_editor->textEdit()->blockBoundingGeometry(block).translated(m_editor->textEdit()->contentOffset()).top());
+    int top = static_cast<int>(
+        m_editor->textEdit()->blockBoundingGeometry(block).translated(m_editor->textEdit()->contentOffset()).top());
     int bottom = top + static_cast<int>(m_editor->textEdit()->blockBoundingRect(block).height());
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
+
+            painter.setPen(QColor("#00008B"));
+
             painter.drawText(0, top, m_editor->lineNumberAreaWidth() - 4, fontMetrics().height(), Qt::AlignRight, number);
         }
 
