@@ -197,7 +197,6 @@ void CxxSyntaxHighlighter::highlightBlock(const QString& text) {
         }
     }
 
-    // 2) Now apply all single-pass regex rules (keywords, strings, single-line "//", etc.).
     for (const auto& rule : highlightingRules) {
         auto matchIt = rule.pattern.globalMatch(text);
         while (matchIt.hasNext()) {

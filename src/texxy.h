@@ -1,59 +1,21 @@
 #ifndef TEXXY_H
 #define TEXXY_H
 
-#include <QAction>
-#include <QCheckBox>
-#include <QCloseEvent>
-#include <QDialog>
-#include <QFileDialog>
-#include <QFileInfo>
-#include <QGridLayout>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
-#include <QMessageBox>
-#include <QMimeDatabase>
-#include <QPushButton>
-#include <QRegularExpression>
+#include <QTabWidget>
+#include <QLabel>
 #include <QSettings>
-#include <QStatusBar>
+#include <QCloseEvent>
 #include <QSyntaxHighlighter>
-#include <QTextEdit>
-#include <QTextStream>
-#include <QToolBar>
-#include <QVector>
 
-class FindReplaceDialog : public QDialog {
-    Q_OBJECT
-
-   public:
-    explicit FindReplaceDialog(QWidget* parent = nullptr);
-
-    void setTextEdit(QTextEdit* edit);
-
-   private slots:
-    void onFindClicked();
-    void onReplaceClicked();
-    void onReplaceAllClicked();
-
-   private:
-    QTextEdit* textEdit = nullptr;
-    QLineEdit* findLineEdit;
-    QLineEdit* replaceLineEdit;
-    QPushButton* findButton;
-    QPushButton* replaceButton;
-    QPushButton* replaceAllButton;
-    QPushButton* closeButton;
-    QCheckBox* matchCaseCheckBox;
-};
+#include "editorwidget.h"
+#include "findreplacedialog.h"
 
 class Texxy : public QMainWindow {
     Q_OBJECT
-
    public:
     explicit Texxy(QWidget* parent = nullptr);
+    ~Texxy() override {}
 
    protected:
     void closeEvent(QCloseEvent* event) override;
@@ -65,26 +27,39 @@ class Texxy : public QMainWindow {
     bool saveFileAs();
     void openRecentFile();
     void showFindReplace();
-
     void updateCursorPosition();
     void updateWindowTitle();
 
    private:
+    // Helper / utility methods
+    int createNewTab(const QString& filePath = QString(), const QString& content = QString());
+    EditorWidget* currentEditorWidget() const;
+    QTextEdit* currentTextEdit() const;
+
+    QString currentFilePath() const;
+    void setCurrentFilePath(const QString& path);
+
     bool maybeSaveChanges();
     void loadFile(const QString& filePath);
     bool saveToPath(const QString& filePath);
+
+    // Recent files
     void addToRecentFiles(const QString& filePath);
     void updateRecentFilesMenu();
     void loadSettings();
     void saveSettings();
 
-    QTextEdit* textEdit = nullptr;
-    QLabel* statusLabel = nullptr;
-    QSyntaxHighlighter* highlighter = nullptr;
-    FindReplaceDialog* findReplaceDialog = nullptr;
+   private:
+    QTabWidget* tabWidget;
+    FindReplaceDialog* findReplaceDialog;
+    QLabel* statusLabel;
 
-    QString currentFilePath;
-    QMenu* recentFilesMenu = nullptr;
+    // If you want one syntax highlighter per tab, you’d store them differently;
+    // for simplicity, we reuse a single pointer each time we load a file:
+    QSyntaxHighlighter* highlighter = nullptr;
+
+    // “Open Recent” support
+    QMenu* recentFilesMenu;
     QStringList recentFiles;
     static const int MaxRecentFiles = 5;
 };

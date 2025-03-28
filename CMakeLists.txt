@@ -11,9 +11,9 @@ find_package(Qt6 6.2 COMPONENTS Core Gui Widgets REQUIRED)
 
 add_executable(texxy
     src/texxy.cpp
-    src/texxy.h
     src/syntax-c.cpp
-    src/syntax-c.h
+    src/editorwidget.cpp
+    src/findreplacedialog.cpp
 )
 
 target_link_libraries(texxy
