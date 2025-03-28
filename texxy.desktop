@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Texxy
+GenericName=Text Editor
+Comment=A simple text editor using GTK 4 and VTE
+Exec=texxy %F
+Icon=/home/me/texxy/texxy.png
+Terminal=false
+Categories=Utility;TextEditor;System;
+MimeType=text/plain;
