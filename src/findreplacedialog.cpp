@@ -1,44 +1,45 @@
 #include "findreplacedialog.h"
+#include <QVBoxLayout>
+#include <QPushButton>
 
 FindReplaceDialog::FindReplaceDialog(QWidget* parent) : QDialog(parent) {
-    setWindowTitle(tr("Find/Replace"));
-    setModal(false);
+    setWindowTitle(tr("Find and Replace"));
 
-    QLabel* findLabel = new QLabel(tr("Find:"), this);
-    findLineEdit = new QLineEdit(this);
+    QGridLayout* layout = new QGridLayout(this);
 
-    QLabel* replaceLabel = new QLabel(tr("Replace:"), this);
-    replaceLineEdit = new QLineEdit(this);
-
-    findButton = new QPushButton(tr("Find Next"), this);
-    replaceButton = new QPushButton(tr("Replace"), this);
-    replaceAllButton = new QPushButton(tr("Replace All"), this);
-    closeButton = new QPushButton(tr("Close"), this);
-
-    matchCaseCheckBox = new QCheckBox(tr("Match Case"), this);
-
-    QGridLayout* layout = new QGridLayout;
+    QLabel* findLabel = new QLabel(tr("Find:"));
     layout->addWidget(findLabel, 0, 0);
-    layout->addWidget(findLineEdit, 0, 1, 1, 3);
+    findLineEdit = new QLineEdit(this);
+    layout->addWidget(findLineEdit, 0, 1);
+
+    QLabel* replaceLabel = new QLabel(tr("Replace:"));
     layout->addWidget(replaceLabel, 1, 0);
-    layout->addWidget(replaceLineEdit, 1, 1, 1, 3);
+    replaceLineEdit = new QLineEdit(this);
+    layout->addWidget(replaceLineEdit, 1, 1);
 
-    layout->addWidget(matchCaseCheckBox, 2, 0, 1, 4);
+    matchCaseCheckBox = new QCheckBox(tr("Match case"), this);
+    layout->addWidget(matchCaseCheckBox, 2, 0, 1, 2);
 
+    findButton = new QPushButton(tr("Find"), this);
     layout->addWidget(findButton, 3, 0);
+    connect(findButton, &QPushButton::clicked, this, &FindReplaceDialog::onFindClicked);
+
+    replaceButton = new QPushButton(tr("Replace"), this);
     layout->addWidget(replaceButton, 3, 1);
-    layout->addWidget(replaceAllButton, 3, 2);
-    layout->addWidget(closeButton, 3, 3);
+    connect(replaceButton, &QPushButton::clicked, this, &FindReplaceDialog::onReplaceClicked);
+
+    replaceAllButton = new QPushButton(tr("Replace All"), this);
+    layout->addWidget(replaceAllButton, 4, 0, 1, 2);
+    connect(replaceAllButton, &QPushButton::clicked, this, &FindReplaceDialog::onReplaceAllClicked);
+
+    closeButton = new QPushButton(tr("Close"), this);
+    layout->addWidget(closeButton, 5, 0, 1, 2);
+    connect(closeButton, &QPushButton::clicked, this, &QDialog::accept);
 
     setLayout(layout);
-
-    connect(findButton, &QPushButton::clicked, this, &FindReplaceDialog::onFindClicked);
-    connect(replaceButton, &QPushButton::clicked, this, &FindReplaceDialog::onReplaceClicked);
-    connect(replaceAllButton, &QPushButton::clicked, this, &FindReplaceDialog::onReplaceAllClicked);
-    connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
 }
 
-void FindReplaceDialog::setTextEdit(QTextEdit* edit) {
+void FindReplaceDialog::setTextEdit(QPlainTextEdit* edit) {
     textEdit = edit;
 }
 
@@ -46,24 +47,16 @@ void FindReplaceDialog::onFindClicked() {
     if (!textEdit)
         return;
 
-    QString searchString = findLineEdit->text();
-    if (searchString.isEmpty())
-        return;
-
+    QString findText = findLineEdit->text();
     QTextDocument::FindFlags flags;
     if (matchCaseCheckBox->isChecked()) {
         flags |= QTextDocument::FindCaseSensitively;
     }
 
-    bool found = textEdit->find(searchString, flags);
+    QTextCursor cursor = textEdit->textCursor();
+    bool found = textEdit->find(findText, flags);
     if (!found) {
-        // Restart from beginning
-        QTextCursor cursor(textEdit->document());
-        textEdit->setTextCursor(cursor);
-        found = textEdit->find(searchString, flags);
-        if (!found) {
-            QMessageBox::information(this, tr("Find"), tr("No further matches found."));
-        }
+        QMessageBox::information(this, tr("Find"), tr("Text not found"));
     }
 }
 
@@ -71,45 +64,37 @@ void FindReplaceDialog::onReplaceClicked() {
     if (!textEdit)
         return;
 
-    QTextCursor cursor = textEdit->textCursor();
-    QString selectedText = cursor.selectedText();
-    QString searchString = findLineEdit->text();
-
-    Qt::CaseSensitivity cs = (matchCaseCheckBox->isChecked()) ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-    // If selection matches the find text, replace it
-    if (selectedText.compare(searchString, cs) == 0) {
-        cursor.insertText(replaceLineEdit->text());
+    QString findText = findLineEdit->text();
+    QString replaceText = replaceLineEdit->text();
+    QTextDocument::FindFlags flags;
+    if (matchCaseCheckBox->isChecked()) {
+        flags |= QTextDocument::FindCaseSensitively;
     }
-    // Then jump to next match
-    onFindClicked();
+
+    QTextCursor cursor = textEdit->textCursor();
+    bool found = textEdit->find(findText, flags);
+    if (found) {
+        cursor.insertText(replaceText);
+    }
+    else {
+        QMessageBox::information(this, tr("Replace"), tr("Text not found"));
+    }
 }
 
 void FindReplaceDialog::onReplaceAllClicked() {
     if (!textEdit)
         return;
 
-    QString searchString = findLineEdit->text();
-    QString replaceString = replaceLineEdit->text();
-    if (searchString.isEmpty())
-        return;
-
-    Qt::CaseSensitivity cs = (matchCaseCheckBox->isChecked()) ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-    QTextDocument* doc = textEdit->document();
-    QTextCursor cursor(doc);
-    int replacements = 0;
-
-    cursor.beginEditBlock();
-    while (!cursor.isNull() && !cursor.atEnd()) {
-        cursor = doc->find(searchString, cursor,
-                           (cs == Qt::CaseSensitive) ? QTextDocument::FindCaseSensitively : QTextDocument::FindFlags());
-        if (!cursor.isNull()) {
-            cursor.insertText(replaceString);
-            replacements++;
-        }
+    QString findText = findLineEdit->text();
+    QString replaceText = replaceLineEdit->text();
+    QTextDocument::FindFlags flags;
+    if (matchCaseCheckBox->isChecked()) {
+        flags |= QTextDocument::FindCaseSensitively;
     }
-    cursor.endEditBlock();
 
-    QMessageBox::information(this, tr("Replace All"), tr("Replaced %1 occurrences.").arg(replacements));
+    QTextCursor cursor = textEdit->textCursor();
+    while (textEdit->find(findText, flags)) {
+        cursor = textEdit->textCursor();
+        cursor.insertText(replaceText);
+    }
 }

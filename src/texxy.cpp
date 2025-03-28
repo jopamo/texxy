@@ -1,8 +1,7 @@
 #include "texxy.h"
 #include "language_support.h"
-#include "languages.cpp"  // or wherever your language definitions live
+#include "languages.cpp"
 #include "findreplacedialog.h"
-
 #include <QAction>
 #include <QFileDialog>
 #include <QMenuBar>
@@ -17,81 +16,82 @@
 #include <QApplication>
 
 Texxy::Texxy(QWidget* parent) : QMainWindow(parent) {
-    // Create the QTabWidget as the central widget
     tabWidget = new QTabWidget(this);
     setCentralWidget(tabWidget);
 
-    // Create an initial empty tab
+    QIcon appIcon("/usr/share/icons/hicolor/256x256/apps/texxy.png");
+    setWindowIcon(appIcon);
+
     createNewTab();
 
-    // Create actions
     QAction* newAction = new QAction(tr("&New"), this);
     QAction* openAction = new QAction(tr("&Open..."), this);
     QAction* saveAction = new QAction(tr("&Save"), this);
     QAction* saveAsAction = new QAction(tr("Save &As..."), this);
     QAction* exitAction = new QAction(tr("E&xit"), this);
     QAction* findReplaceAction = new QAction(tr("Find/Replace..."), this);
+    QAction* closeTabAction = new QAction(tr("Close Tab"), this);  // New action for closing tabs
 
-    // Optional shortcuts
     newAction->setShortcut(QKeySequence::New);
     openAction->setShortcut(QKeySequence::Open);
     saveAction->setShortcut(QKeySequence::Save);
     saveAsAction->setShortcut(QKeySequence::SaveAs);
+    closeTabAction->setShortcut(QKeySequence("Ctrl+W"));  // Ctrl+W to close tab
 
-    // Connect actions
     connect(newAction, &QAction::triggered, this, &Texxy::newFile);
     connect(openAction, &QAction::triggered, this, &Texxy::openFile);
     connect(saveAction, &QAction::triggered, this, &Texxy::saveFile);
     connect(saveAsAction, &QAction::triggered, this, &Texxy::saveFileAs);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
-
     connect(findReplaceAction, &QAction::triggered, this, &Texxy::showFindReplace);
+    connect(closeTabAction, &QAction::triggered, this, &Texxy::closeCurrentTab);  // Connect close tab action
 
-    // File menu
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newAction);
     fileMenu->addAction(openAction);
     fileMenu->addAction(saveAction);
     fileMenu->addAction(saveAsAction);
+    fileMenu->addAction(closeTabAction);  // Add the close tab action to the menu
 
-    // Recent files submenu
     recentFilesMenu = fileMenu->addMenu(tr("Open Recent"));
     updateRecentFilesMenu();
-
     fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
 
-    // Edit menu
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(findReplaceAction);
 
-    // Status bar
     statusLabel = new QLabel(this);
     statusBar()->addPermanentWidget(statusLabel);
 
-    // Create Find/Replace dialog
     findReplaceDialog = new FindReplaceDialog(this);
-    // Assign the current tab’s textEdit
     findReplaceDialog->setTextEdit(currentTextEdit());
 
-    // When current tab changes, re-assign the find dialog’s textEdit
     connect(tabWidget, &QTabWidget::currentChanged, this, [this](int) {
         findReplaceDialog->setTextEdit(currentTextEdit());
         updateCursorPosition();
         updateWindowTitle();
     });
 
-    // Set window title and size
     setWindowTitle(tr("Untitled - Texxy"));
     resize(900, 600);
 
-    // Load settings (recent files, etc.)
     loadSettings();
     updateCursorPosition();
 }
 
+void Texxy::closeCurrentTab() {
+    int currentIndex = tabWidget->currentIndex();
+    if (currentIndex != -1) {
+        QWidget* currentTab = tabWidget->widget(currentIndex);
+        if (maybeSaveChanges()) {
+            tabWidget->removeTab(currentIndex);
+            delete currentTab;
+        }
+    }
+}
+
 void Texxy::closeEvent(QCloseEvent* event) {
-    // Check unsaved changes on the *current* tab (you could extend to all tabs)
     if (maybeSaveChanges()) {
         saveSettings();
         event->accept();
@@ -101,11 +101,10 @@ void Texxy::closeEvent(QCloseEvent* event) {
     }
 }
 
-// Slots
 void Texxy::newFile() {
     if (!maybeSaveChanges())
         return;
-    createNewTab();  // new, untitled tab
+    createNewTab();
 }
 
 void Texxy::openFile() {
@@ -115,7 +114,7 @@ void Texxy::openFile() {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"));
     if (!fileName.isEmpty()) {
         int newTabIndex = createNewTab(fileName);
-        tabWidget->setCurrentIndex(newTabIndex);  // Switch to it
+        tabWidget->setCurrentIndex(newTabIndex);
         loadFile(fileName);
         addToRecentFiles(fileName);
     }
@@ -124,7 +123,7 @@ void Texxy::openFile() {
 bool Texxy::saveFile() {
     QString path = currentFilePath();
     if (path.isEmpty()) {
-        return saveFileAs();  // user might pick a new path
+        return saveFileAs();
     }
     return saveToPath(path);
 }
@@ -158,7 +157,7 @@ void Texxy::showFindReplace() {
 }
 
 void Texxy::updateCursorPosition() {
-    QTextEdit* edit = currentTextEdit();
+    QPlainTextEdit* edit = currentTextEdit();
     if (!edit) {
         statusLabel->setText(tr("Line: -, Col: -"));
         return;
@@ -173,31 +172,25 @@ void Texxy::updateWindowTitle() {
     QString path = currentFilePath();
     QString title = path.isEmpty() ? tr("Untitled") : QFileInfo(path).fileName();
 
-    QTextEdit* edit = currentTextEdit();
+    QPlainTextEdit* edit = currentTextEdit();
     if (edit && edit->document()->isModified()) {
         title += "*";
     }
     setWindowTitle(title + tr(" - Texxy"));
 }
 
-// Private Methods
 int Texxy::createNewTab(const QString& filePath, const QString& content) {
-    // Create our EditorWidget
     EditorWidget* editorWidget = new EditorWidget(this);
     editorWidget->setFilePath(filePath);
-
-    // Optional styling
-    editorWidget->textEdit->setStyleSheet("QTextEdit { background-color: #000; color: #FFF; }");
+    editorWidget->textEdit()->setStyleSheet("QPlainTextEdit { background-color: #000; color: #FFF; }");
 
     if (!content.isEmpty()) {
-        editorWidget->textEdit->setPlainText(content);
+        editorWidget->textEdit()->setPlainText(content);
     }
 
-    // Connect signals for modification & cursor movement
-    connect(editorWidget->textEdit->document(), &QTextDocument::modificationChanged, this, &Texxy::updateWindowTitle);
-    connect(editorWidget->textEdit, &QTextEdit::cursorPositionChanged, this, &Texxy::updateCursorPosition);
+    connect(editorWidget->textEdit()->document(), &QTextDocument::modificationChanged, this, &Texxy::updateWindowTitle);
+    connect(editorWidget->textEdit(), &QPlainTextEdit::cursorPositionChanged, this, &Texxy::updateCursorPosition);
 
-    // Tab label
     QString tabLabel = filePath.isEmpty() ? tr("Untitled") : QFileInfo(filePath).fileName();
 
     int idx = tabWidget->addTab(editorWidget, tabLabel);
@@ -206,14 +199,13 @@ int Texxy::createNewTab(const QString& filePath, const QString& content) {
     return idx;
 }
 
-// Helper to retrieve the current EditorWidget
 EditorWidget* Texxy::currentEditorWidget() const {
     return qobject_cast<EditorWidget*>(tabWidget->currentWidget());
 }
 
-QTextEdit* Texxy::currentTextEdit() const {
+QPlainTextEdit* Texxy::currentTextEdit() const {
     EditorWidget* ew = currentEditorWidget();
-    return ew ? ew->textEdit : nullptr;
+    return ew ? ew->textEdit() : nullptr;
 }
 
 QString Texxy::currentFilePath() const {
@@ -228,7 +220,6 @@ void Texxy::setCurrentFilePath(const QString& path) {
 
     ew->setFilePath(path);
 
-    // Update the tab text to match the file name
     int idx = tabWidget->indexOf(ew);
     if (idx >= 0) {
         QString name = path.isEmpty() ? tr("Untitled") : QFileInfo(path).fileName();
@@ -237,16 +228,15 @@ void Texxy::setCurrentFilePath(const QString& path) {
 }
 
 bool Texxy::maybeSaveChanges() {
-    QTextEdit* edit = currentTextEdit();
+    QPlainTextEdit* edit = currentTextEdit();
     if (!edit)
         return true;
 
     if (!edit->document()->isModified())
         return true;
 
-    auto ret = QMessageBox::warning(this, tr("Unsaved Changes"),
-                                    tr("The document has been modified.\nDo you want to save your changes?"),
-                                    QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    auto ret =
+        QMessageBox::warning(this, tr("Unsaved Changes"), tr("The document has been modified.\nDo you want to save your changes?"), QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
     if (ret == QMessageBox::Save) {
         return saveFile();
@@ -254,7 +244,6 @@ bool Texxy::maybeSaveChanges() {
     else if (ret == QMessageBox::Cancel) {
         return false;
     }
-    // Otherwise, Discard
     return true;
 }
 
@@ -265,32 +254,27 @@ void Texxy::loadFile(const QString& filePath) {
         return;
     }
     QTextStream in(&file);
-
     QString content = in.readAll();
     file.close();
 
-    QTextEdit* edit = currentTextEdit();
+    QPlainTextEdit* edit = currentTextEdit();
     if (!edit)
         return;
 
     edit->setPlainText(content);
     edit->document()->setModified(false);
 
-    // Update file path in the current EditorWidget
     setCurrentFilePath(filePath);
     updateWindowTitle();
 
-    // Re-create the syntax highlighter for the new document
     if (highlighter) {
         delete highlighter;
         highlighter = nullptr;
     }
 
-    // MIME detection (example)
     QMimeDatabase db;
     QMimeType mime = db.mimeTypeForFile(filePath, QMimeDatabase::MatchContent);
 
-    // Language detection from your custom "language_support.h" / "languages.cpp"
     const LanguageDefinition* lang = findMatchingLanguage(mime, filePath.toLower());
     if (lang) {
         highlighter = lang->highlighterFactory(edit->document());
@@ -298,7 +282,7 @@ void Texxy::loadFile(const QString& filePath) {
 }
 
 bool Texxy::saveToPath(const QString& filePath) {
-    QTextEdit* edit = currentTextEdit();
+    QPlainTextEdit* edit = currentTextEdit();
     if (!edit)
         return false;
 
@@ -314,14 +298,11 @@ bool Texxy::saveToPath(const QString& filePath) {
     out << edit->toPlainText();
     file.close();
 
-    // Mark as not modified
     edit->document()->setModified(false);
     setCurrentFilePath(filePath);
     updateWindowTitle();
     return true;
 }
-
-// Recent Files
 
 void Texxy::addToRecentFiles(const QString& filePath) {
     recentFiles.removeAll(filePath);
@@ -343,7 +324,6 @@ void Texxy::updateRecentFilesMenu() {
     recentFilesMenu->setEnabled(!recentFiles.isEmpty());
 }
 
-// Settings
 void Texxy::loadSettings() {
     QSettings settings("MyCompany", "Texxy");
     recentFiles = settings.value("recentFiles").toStringList();
@@ -355,7 +335,6 @@ void Texxy::saveSettings() {
     settings.setValue("recentFiles", recentFiles);
 }
 
-// main()
 int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     Texxy editor;

@@ -3,7 +3,7 @@ BasedOnStyle: Chromium
 IndentWidth: 4
 ContinuationIndentWidth: 4
 UseTab: Never
-ColumnLimit: 120
+ColumnLimit: 200
 
 BraceWrapping:
   AfterCaseLabel: false

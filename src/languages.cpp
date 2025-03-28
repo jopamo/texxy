@@ -3,10 +3,7 @@
 // #include "syntax-python.h" // etc. if you have more
 
 static const LanguageDefinition SUPPORTED_LANGUAGES[] = {
-    {"C/C++",
-     {"text/x-csrc", "text/x-c++src", "text/x-chdr"},
-     {".c", ".cpp", ".cxx", ".h", ".hpp"},
-     createCxxHighlighter},
+    {"C/C++", {"text/x-csrc", "text/x-c++src", "text/x-chdr"}, {".c", ".cpp", ".cxx", ".h", ".hpp"}, createCxxHighlighter},
     // Example for Python
     // {
     //     "Python",

@@ -2,38 +2,38 @@
 #define FINDREPLACEDIALOG_H
 
 #include <QDialog>
+#include <QPlainTextEdit>
 #include <QLineEdit>
-#include <QPushButton>
 #include <QCheckBox>
-#include <QTextEdit>
-#include <QGridLayout>
+#include <QPushButton>
 #include <QLabel>
-#include <QMessageBox>
 #include <QTextCursor>
 #include <QTextDocument>
+#include <QMessageBox>
+#include <QGridLayout>
 
 class FindReplaceDialog : public QDialog {
     Q_OBJECT
 
    public:
-    explicit FindReplaceDialog(QWidget* parent = nullptr);
+    explicit FindReplaceDialog(QWidget* parent = nullptr);  // Constructor sets up UI components and layout
 
-    void setTextEdit(QTextEdit* edit);
+    void setTextEdit(QPlainTextEdit* edit);  // Sets the text editor where Find/Replace will occur
 
    private slots:
-    void onFindClicked();
-    void onReplaceClicked();
-    void onReplaceAllClicked();
+    void onFindClicked();        // Handles the "Find" button click event
+    void onReplaceClicked();     // Handles the "Replace" button click event
+    void onReplaceAllClicked();  // Handles the "Replace All" button click event
 
    private:
-    QTextEdit* textEdit = nullptr;
-    QLineEdit* findLineEdit = nullptr;
-    QLineEdit* replaceLineEdit = nullptr;
-    QPushButton* findButton = nullptr;
-    QPushButton* replaceButton = nullptr;
-    QPushButton* replaceAllButton = nullptr;
-    QPushButton* closeButton = nullptr;
-    QCheckBox* matchCaseCheckBox = nullptr;
+    QLineEdit* findLineEdit;        // Input field for search term
+    QLineEdit* replaceLineEdit;     // Input field for replacement term
+    QCheckBox* matchCaseCheckBox;   // Checkbox to toggle case-sensitive search
+    QPushButton* findButton;        // Button to trigger "Find"
+    QPushButton* replaceButton;     // Button to trigger "Replace"
+    QPushButton* replaceAllButton;  // Button to trigger "Replace All"
+    QPushButton* closeButton;       // Button to close the dialog
+    QPlainTextEdit* textEdit;       // The text editor to perform find/replace operations on
 };
 
 #endif  // FINDREPLACEDIALOG_H

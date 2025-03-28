@@ -16,13 +16,10 @@ CxxSyntaxHighlighter::CxxSyntaxHighlighter(QTextDocument* parent) : QSyntaxHighl
 }
 
 void CxxSyntaxHighlighter::initializeKeywords() {
-    QStringList keywordPatterns = {
-        "\\bbreak\\b",    "\\bcase\\b",      "\\bcontinue\\b",  "\\bdefault\\b",   "\\bdo\\b",          "\\belse\\b",
-        "\\bfor\\b",      "\\bgoto\\b",      "\\bif\\b",        "\\breturn\\b",    "\\bswitch\\b",      "\\bwhile\\b",
-        "\\basm\\b",      "\\bdecltype\\b",  "\\bdelete\\b",    "\\bfriend\\b",    "\\bnamespace\\b",   "\\bnew\\b",
-        "\\boperator\\b", "\\bthis\\b",      "\\bthrow\\b",     "\\btry\\b",       "\\bcatch\\b",       "\\busing\\b",
-        "\\bco_await\\b", "\\bco_return\\b", "\\bco_yield\\b",  "\\bconcept\\b",   "\\brequires\\b",    "\\bmodule\\b",
-        "\\bimport\\b",   "\\bexport\\b",    "\\bconsteval\\b", "\\bconstinit\\b", "\\boperator\"\"\\b"};
+    QStringList keywordPatterns = {"\\bbreak\\b",    "\\bcase\\b",     "\\bcontinue\\b", "\\bdefault\\b", "\\bdo\\b",       "\\belse\\b",      "\\bfor\\b",       "\\bgoto\\b",        "\\bif\\b",
+                                   "\\breturn\\b",   "\\bswitch\\b",   "\\bwhile\\b",    "\\basm\\b",     "\\bdecltype\\b", "\\bdelete\\b",    "\\bfriend\\b",    "\\bnamespace\\b",   "\\bnew\\b",
+                                   "\\boperator\\b", "\\bthis\\b",     "\\bthrow\\b",    "\\btry\\b",     "\\bcatch\\b",    "\\busing\\b",     "\\bco_await\\b",  "\\bco_return\\b",   "\\bco_yield\\b",
+                                   "\\bconcept\\b",  "\\brequires\\b", "\\bmodule\\b",   "\\bimport\\b",  "\\bexport\\b",   "\\bconsteval\\b", "\\bconstinit\\b", "\\boperator\"\"\\b"};
 
     QTextCharFormat keywordFormat;
     keywordFormat.setForeground(QColor("#C586C0"));
@@ -37,18 +34,13 @@ void CxxSyntaxHighlighter::initializeKeywords() {
 }
 
 void CxxSyntaxHighlighter::initializeTypes() {
-    QStringList typePatterns = {
-        "\\bbool\\b",         "\\bchar\\b",      "\\bwchar_t\\b",   "\\bshort\\b",     "\\blong\\b",
-        "\\bsigned\\b",       "\\bunsigned\\b",  "\\bfloat\\b",     "\\bdouble\\b",    "\\bvoid\\b",
-        "\\bint8_t\\b",       "\\buint8_t\\b",   "\\bint16_t\\b",   "\\buint16_t\\b",  "\\bint32_t\\b",
-        "\\buint32_t\\b",     "\\bint64_t\\b",   "\\buint64_t\\b",  "\\bsize_t\\b",    "\\bptrdiff_t\\b",
-        "\\bintptr_t\\b",     "\\buintptr_t\\b", "\\bchar16_t\\b",  "\\bchar32_t\\b",  "\\bchar8_t\\b",
-        "\\bstruct\\b",       "\\bunion\\b",     "\\benum\\b",      "\\bclass\\b",     "\\btypename\\b",
-        "\\btemplate\\b",     "\\bauto\\b",      "\\bconstexpr\\b", "\\bconstinit\\b", "\\bconsteval\\b",
-        "\\bthread_local\\b", "\\bmutable\\b",   "\\binline\\b",    "\\bvirtual\\b",   "\\bexplicit\\b",
-        "\\bstatic\\b",       "\\bregister\\b",  "\\bextern\\b",    "\\bvolatile\\b",  "\\brestrict\\b",
-        "\\btypename\\b",     "\\bNULL\\b",      "\\bnullptr\\b",   "\\bnullptr_t\\b", "\\bTRUE\\b",
-        "\\bFALSE\\b",        "\\btrue\\b",      "\\bfalse\\b",     "\\bstd::\\w+\\b", "\\[\\[\\w+\\]\\]"};
+    QStringList typePatterns = {"\\bbool\\b",      "\\bchar\\b",      "\\bwchar_t\\b",   "\\bshort\\b",        "\\blong\\b",     "\\bsigned\\b",    "\\bunsigned\\b",  "\\bfloat\\b",
+                                "\\bdouble\\b",    "\\bvoid\\b",      "\\bint8_t\\b",    "\\buint8_t\\b",      "\\bint16_t\\b",  "\\buint16_t\\b",  "\\bint32_t\\b",   "\\buint32_t\\b",
+                                "\\bint64_t\\b",   "\\buint64_t\\b",  "\\bsize_t\\b",    "\\bptrdiff_t\\b",    "\\bintptr_t\\b", "\\buintptr_t\\b", "\\bchar16_t\\b",  "\\bchar32_t\\b",
+                                "\\bchar8_t\\b",   "\\bstruct\\b",    "\\bunion\\b",     "\\benum\\b",         "\\bclass\\b",    "\\btypename\\b",  "\\btemplate\\b",  "\\bauto\\b",
+                                "\\bconstexpr\\b", "\\bconstinit\\b", "\\bconsteval\\b", "\\bthread_local\\b", "\\bmutable\\b",  "\\binline\\b",    "\\bvirtual\\b",   "\\bexplicit\\b",
+                                "\\bstatic\\b",    "\\bregister\\b",  "\\bextern\\b",    "\\bvolatile\\b",     "\\brestrict\\b", "\\btypename\\b",  "\\bNULL\\b",      "\\bnullptr\\b",
+                                "\\bnullptr_t\\b", "\\bTRUE\\b",      "\\bFALSE\\b",     "\\btrue\\b",         "\\bfalse\\b",    "\\bstd::\\w+\\b", "\\[\\[\\w+\\]\\]"};
 
     QTextCharFormat typeFormat;
     typeFormat.setForeground(QColor("#4FC1FF"));
@@ -86,16 +78,6 @@ void CxxSyntaxHighlighter::initializeComments() {
 
     {
         HighlightingRule rule;
-        QTextCharFormat doxygenCommentFormat;
-        doxygenCommentFormat.setForeground(QColor("#B5CEA8"));
-        doxygenCommentFormat.setFontWeight(QFont::Bold);
-        rule.pattern = QRegularExpression("///[^\n]*|/\\*\\*[^\n]*");
-        rule.format = doxygenCommentFormat;
-        highlightingRules.append(rule);
-    }
-
-    {
-        HighlightingRule rule;
         QTextCharFormat todoFormat;
         todoFormat.setForeground(QColor("#FF9C00"));
         todoFormat.setFontWeight(QFont::Bold);
@@ -126,14 +108,10 @@ void CxxSyntaxHighlighter::initializeStrings() {
         highlightingRules.append(rule);
     }
 
-    // Fixed raw string pattern
     {
         HighlightingRule rule;
         QTextCharFormat rawStringFormat;
         rawStringFormat.setForeground(QColor("#CE9178"));
-        // This pattern is a simplified approach that recognizes C++ raw strings:
-        //   R"(...)" or LR"(...)", u8R"(...)", etc. (Optional prefix + R"( ... )")
-        // It's still not 100% perfect for all delimiter sequences but good enough for typical usage.
         rule.pattern = QRegularExpression(R"(\b(?:[uU]|u8|L)?R"([^()\\"]*)\([^)]*\)\1"\b)");
         rule.format = rawStringFormat;
         highlightingRules.append(rule);
@@ -169,22 +147,19 @@ void CxxSyntaxHighlighter::initializeOperators() {
 }
 
 void CxxSyntaxHighlighter::highlightBlock(const QString& text) {
-    // First, we set the block state to 'not in a comment' by default.
     setCurrentBlockState(0);
 
-    // 1) Handle multi-line comments (/* ... */) right away.
     int startIndex = (previousBlockState() == 1) ? 0 : text.indexOf("/*");
     while (startIndex >= 0) {
         int endIndex = text.indexOf("*/", startIndex);
         int commentLength = 0;
 
         if (endIndex == -1) {
-            // No closing '*/' found — stay in comment state to next block
             setCurrentBlockState(1);
             commentLength = text.length() - startIndex;
         }
         else {
-            commentLength = endIndex - startIndex + 2;  // +2 for "*/"
+            commentLength = endIndex - startIndex + 2;
         }
 
         setFormat(startIndex, commentLength, multiLineCommentFormat);
