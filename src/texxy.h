@@ -2,6 +2,7 @@
 #define TEXXY_H
 
 #include <QMainWindow>
+#include <QProcess>
 #include <QTabWidget>
 #include <QPlainTextEdit>
 #include <QSettings>
@@ -59,6 +60,8 @@ class Texxy : public QMainWindow {
     void saveSettings();  // Saves editor settings (recent files, etc.).
 
     void closeCurrentTab();
+
+    void applyClangFormat();
 
    private:
     QTabWidget* tabWidget = nullptr;       // Tab widget to manage multiple editor tabs.

@@ -5,7 +5,6 @@
 #include <QScrollBar>
 #include <QPaintEvent>
 #include <QTextCursor>
-#include <QDebug>
 
 EditorWidget::LineNumberArea::LineNumberArea(EditorWidget* editor) : QWidget(editor), m_editor(editor) {
     setAttribute(Qt::WA_OpaquePaintEvent);
@@ -23,8 +22,7 @@ void EditorWidget::LineNumberArea::paintEvent(QPaintEvent* event) {
     QTextBlock block = m_editor->textEdit()->firstVisibleBlock();
     int blockNumber = block.blockNumber();
 
-    int top = static_cast<int>(
-        m_editor->textEdit()->blockBoundingGeometry(block).translated(m_editor->textEdit()->contentOffset()).top());
+    int top = static_cast<int>(m_editor->textEdit()->blockBoundingGeometry(block).translated(m_editor->textEdit()->contentOffset()).top());
     int bottom = top + static_cast<int>(m_editor->textEdit()->blockBoundingRect(block).height());
 
     while (block.isValid() && top <= event->rect().bottom()) {

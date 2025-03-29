@@ -30,28 +30,31 @@ Texxy::Texxy(QWidget* parent) : QMainWindow(parent) {
     QAction* saveAsAction = new QAction(tr("Save &As..."), this);
     QAction* exitAction = new QAction(tr("E&xit"), this);
     QAction* findReplaceAction = new QAction(tr("Find/Replace..."), this);
-    QAction* closeTabAction = new QAction(tr("Close Tab"), this);  // New action for closing tabs
+    QAction* closeTabAction = new QAction(tr("Close Tab"), this);
 
+    // Set up shortcuts
     newAction->setShortcut(QKeySequence::New);
     openAction->setShortcut(QKeySequence::Open);
     saveAction->setShortcut(QKeySequence::Save);
     saveAsAction->setShortcut(QKeySequence::SaveAs);
-    closeTabAction->setShortcut(QKeySequence("Ctrl+W"));  // Ctrl+W to close tab
+    closeTabAction->setShortcut(QKeySequence("Ctrl+W"));
 
+    // Connect actions
     connect(newAction, &QAction::triggered, this, &Texxy::newFile);
     connect(openAction, &QAction::triggered, this, &Texxy::openFile);
     connect(saveAction, &QAction::triggered, this, &Texxy::saveFile);
     connect(saveAsAction, &QAction::triggered, this, &Texxy::saveFileAs);
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
     connect(findReplaceAction, &QAction::triggered, this, &Texxy::showFindReplace);
-    connect(closeTabAction, &QAction::triggered, this, &Texxy::closeCurrentTab);  // Connect close tab action
+    connect(closeTabAction, &QAction::triggered, this, &Texxy::closeCurrentTab);
 
+    // Menu setup
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->addAction(newAction);
     fileMenu->addAction(openAction);
     fileMenu->addAction(saveAction);
     fileMenu->addAction(saveAsAction);
-    fileMenu->addAction(closeTabAction);  // Add the close tab action to the menu
+    fileMenu->addAction(closeTabAction);
 
     recentFilesMenu = fileMenu->addMenu(tr("Open Recent"));
     updateRecentFilesMenu();
@@ -61,6 +64,7 @@ Texxy::Texxy(QWidget* parent) : QMainWindow(parent) {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(findReplaceAction);
 
+    // Status bar and find/replace dialog
     statusLabel = new QLabel(this);
     statusBar()->addPermanentWidget(statusLabel);
 
